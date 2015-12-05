@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<appender name="lou-sender" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="/lou-sender/logs/feeder.log" />
+		<param name="MaxFileSize" value="50MB"/>
+		<param name="MaxBackupIndex" value="2"/>
+		<param name="DatePattern" value="'.'yyy-MM-dd"/>
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d %-5p [%t] %c - %m%n"/>
+		</layout>
+	</appender>
+
+	<category name="bemvindo.service">
+		<priority value="debug" />
+		<appender-ref ref="lou-sender" />
+	</category>
+
+</log4j:configuration>

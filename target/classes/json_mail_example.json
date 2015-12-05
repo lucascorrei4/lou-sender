@@ -1,0 +1,65 @@
+{
+    "sender": {
+        "key": "f0964d69-73ea-4bd3-acdd-53c12ad5e06d",
+        "company": "Multimarcas",
+        "from": "multimarcas@provedor.com",
+        "postedAt": "2015-05-03T06:13:17 +03:00"
+    },
+    "bodyMail": {
+        "template": "1",
+        "title1": "Aqui vai o <b>title1</b>",
+        "subTitle1": "Aqui vai o subTitle1",
+        "title2": "Aqui vai o title2",
+        "paragraph1": "Aqui vai o paragraph1",
+        "paragraph2": "Aqui vai o paragraph2",
+        "paragraph3": "Aqui vai o paragraph3",
+        "paragraph4": "Aqui vai o paragraph4",
+        "paragraph5": "Aqui vai o paragraph5",
+        "title3": "Aqui vai o title3",
+        "paragraph6": "Aqui vai o paragraph6",
+        "paragraph7": "Aqui vai o paragraph7",
+        "paragraph8": "Aqui vai o paragraph8",
+        "paragraph9": "Aqui vai o paragraph9",
+        "paragraph10": "Aqui vai o paragraph10",
+        "footer1": "Aqui vai o footer1",
+        "footer2": "Aqui vai o footer2",
+        "footer3": "Aqui vai o footer3",
+        "image1": "http://placehold.it/image1-32x32",
+        "image2": "http://placehold.it/image2-32x32",
+        "image3": "http://placehold.it/image4-32x32",
+        "image4": "http://placehold.it/image5-32x32",
+        "attachment": "http://placehold.it/attachment"
+    },
+    "sendTo": [
+        {
+            "name": "Lucas da Silva",
+            "destination": "lucasdasilva@provedor.com",
+            "sex": "masculino",
+            "status": {
+                "sent": false,
+                "read": false,
+                "sendDate": "2015-10-02 11h55"
+            }
+        },
+        {
+            "name": "Maria Ferreira",
+            "destination": "mariaferreira@provedor.com",
+            "sex": "feminino",
+            "status": {
+                "sent": false,
+                "read": false,
+                "sendDate": "2015-10-02 11h55"
+            }
+        },
+        {
+            "name": "José das Pedras",
+            "destination": "mariaferreira@provedor.com",
+            "sex": "feminino",
+            "status": {
+                "sent": false,
+                "read": false,
+                "sendDate": "2015-10-02 11h55"
+            }
+        }
+    ]
+}

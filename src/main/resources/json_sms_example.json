@@ -1,0 +1,44 @@
+{
+    "sender": {
+        "key": "f0964d69-73ea-4bd3-acdd-53c12ad5e06e",
+        "company": "Multimarcas",
+        "from": "multimarcas@provedor.com",
+        "postedAt": "2015-05-03T06:13:17 +03:00"
+    },
+    "bodySMS": {
+        "title": "Promoçao",
+        "message": "Venha e aproveite a nossa promocao."
+    },
+    "sendTo": [
+        {
+            "name": "Lucas da Silva",
+            "destination": "629541125",
+            "sex": "masculino",
+            "status": {
+                "sent": false,
+                "read": false,
+                "sendDate": "2015-10-02 11h55"
+            }
+        },
+        {
+            "name": "Maria Ferreira",
+            "destination": "629541125",
+            "sex": "feminino",
+            "status": {
+                "sent": false,
+                "read": false,
+                "sendDate": "2015-10-02 11h55"
+            }
+        },
+        {
+            "name": "José das Pedras",
+            "destination": "629541125",
+            "sex": "feminino",
+            "status": {
+                "sent": false,
+                "read": false,
+                "sendDate": "2015-10-02 11h55"
+            }
+        }
+    ]
+}
