@@ -14,7 +14,7 @@
 
 	<category name="bemvindo.service">
 		<priority value="debug" />
-		<appender-ref ref="lou-sender" />
+		<appender-ref ref="Lou-sender" />
 	</category>
 
 </log4j:configuration>

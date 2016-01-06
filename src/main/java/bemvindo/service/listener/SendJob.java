@@ -8,8 +8,6 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-import bemvindo.service.controller.SendMailController;
-
 public class SendJob implements Job {
 	public static Logger logger = Logger.getLogger(SendJob.class);
 
@@ -20,14 +18,12 @@ public class SendJob implements Job {
 		String dateNow = formatter.format(currentDate.getTime());
 		String triggerFeedUrl = context.getTrigger().getJobKey().toString();
 
-		triggerFeedUrl = triggerFeedUrl.replace("?", "");
 
 		logger.warn("Starting : " + triggerFeedUrl + " Job at " + dateNow);
-		SendMailController sendController = new SendMailController();
-		sendController.controlMailSending();
-	}
-	
-	public static void main(String[] args) {
+		System.out.println("Starting : " + triggerFeedUrl + " Job at " + dateNow);
+		
+		// SendMailController sendController = new SendMailController();
+		// sendController.controlMailSending();
 	}
 
 }
