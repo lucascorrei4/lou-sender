@@ -1,8 +1,5 @@
 package bemvindo.service.sender;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
@@ -12,6 +9,7 @@ import bemvindo.service.configuration.ApplicationConfiguration;
 import bemvindo.service.model.BodyMail;
 import bemvindo.service.model.SendTo;
 import bemvindo.service.model.Sender;
+import bemvindo.service.utils.Utils;
 
 public class Mail {
 
@@ -40,21 +38,33 @@ public class Mail {
 
 	public void sendHTMLMail(SendTo sendTo, Sender sender, BodyMail bodyMail) {
 		try {
-			HtmlEmail email = new HtmlEmail();
-			email.setAuthentication(ApplicationConfiguration.getInstance().getMailUserName(), ApplicationConfiguration.getInstance().getMailPassword());
-			email.setHostName(ApplicationConfiguration.getInstance().getMailHostName());
-			email.addTo(sendTo.destination, sendTo.name);
-			email.setFrom(sender.from, sender.company);
-			email.setSubject(bodyMail.title1);
-			URL url = new URL("http://jsonlint.com/c/images/kindling.png");
-			String cid = email.embed(url, "logo");
-			email.setHtmlMsg("<html>The apache logo - <img src=\"cid:" + cid + "\"></html>");
-			email.setTextMsg("Seu servidor de e-mail não suporta mensagem HTML");
-			email.send();
+			String userName = ApplicationConfiguration.getInstance().getMailUserName();
+			String password = ApplicationConfiguration.getInstance().getMailPassword();
+			String hostName = ApplicationConfiguration.getInstance().getMailHostName();
+			if (validateMailCredentials(userName, password, hostName)) {
+				HtmlEmail email = new HtmlEmail();
+				email.setAuthentication(userName, password);
+				email.setHostName(hostName);
+				email.addTo(sendTo.destination, sendTo.name);
+				email.setFrom(sender.from, sender.company);
+				email.setSubject(bodyMail.title1);
+				String url = "http://wgvjavap.javaprovider.net/public/templatepublic/images/logo-small.png";
+				email.setHtmlMsg("<html>The apache logo - <img src=\"" + url + "\"></html>");
+				email.setTextMsg("Seu servidor de e-mail não suporta mensagem HTML");
+				email.send();
+			} else {
+				logger.error("Problem validate mail credentials (username, password, hostname). Verify project configuration properties.");
+			}
 		} catch (EmailException e) {
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
 	}
+
+	private boolean validateMailCredentials(String userName, String password, String hostName) {
+		if (Utils.isNullOrEmpty(userName) || Utils.isNullOrEmpty(password) || Utils.isNullOrEmpty(hostName)) {
+			return false;
+		}
+		return true;
+	}
+
 }

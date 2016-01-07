@@ -33,7 +33,7 @@
     "sendTo": [
         {
             "name": "Lucas da Silva",
-            "destination": "lucasdasilva@provedor.com",
+            "destination": "lucascorreiaevangelista@gmail.com",
             "sex": "masculino",
             "status": {
                 "sent": false,
@@ -43,7 +43,7 @@
         },
         {
             "name": "Maria Ferreira",
-            "destination": "mariaferreira@provedor.com",
+            "destination": "lucascorreiaevangelista@gmail.com",
             "sex": "feminino",
             "status": {
                 "sent": false,
@@ -53,7 +53,7 @@
         },
         {
             "name": "José das Pedras",
-            "destination": "mariaferreira@provedor.com",
+            "destination": "lucascorreiaevangelista@gmail.com",
             "sex": "feminino",
             "status": {
                 "sent": false,

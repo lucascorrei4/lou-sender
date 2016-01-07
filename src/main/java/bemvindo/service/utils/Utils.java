@@ -79,7 +79,7 @@ public class Utils {
 		String result = text.replace(oldValue, newValue);
 		return result;
 	}
-	
+
 	public static Gson getGsonBuilder() {
 		GsonBuilder builder = new GsonBuilder();
 		builder.setPrettyPrinting();
@@ -87,5 +87,12 @@ public class Utils {
 		builder.serializeNulls();
 		builder.serializeSpecialFloatingPointValues();
 		return builder.create();
+	}
+
+	public static String dateNow() {
+		Calendar currentDate = Calendar.getInstance();
+		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		String dateNow = formatter.format(currentDate.getTime());
+		return dateNow;
 	}
 }

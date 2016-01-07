@@ -30,54 +30,58 @@ public class SendMailController {
 			 * Connect in redis and list keys that are waiting to be sent with
 			 * clausure 'mail*waiting'
 			 */
-			Set<String> keys = redis.getKeysByPattern("KEYS mail*waiting");
-			JsonBody jsonBody = new JsonBody();
-			for (String key : keys) {
-				String json = redis.getKey(key);
-				if (!Utils.isNullOrEmpty(json)) {
-					Gson gson = Utils.getGsonBuilder();
-					JsonBodyMail jsonBodyMail = jsonBody.jsonBodyMail;
-					jsonBodyMail = gson.fromJson(json, JsonBodyMail.class);
-					Sender sender = jsonBodyMail.sender;
-					BodyMail bodyMail = jsonBodyMail.bodyMail;
-					List<SendTo> mailList = new ArrayList<SendTo>();
-					mailList = jsonBodyMail.sendTo;
-					if (!mailList.isEmpty() || mailList != null) {
-						for (int attempt = 1; attempt == 3; attempt++) {
-							int mailsToSend = mailList.size();
-							/*
-							 * Send e-mails and return a list of unsuccessful
-							 * sent
-							 */
-							logger.info("Institution: " + sender.company + ". Attempt " + attempt + ". Trying to send " + mailsToSend);
-							try {
-								List<SendTo> exceptionList = sendMail(mailList, sender, bodyMail);
+			Set<String> keys = redis.getKeysByPattern("mail*waiting");
+			if (!keys.isEmpty()) {
+				JsonBody jsonBody = new JsonBody();
+				for (String key : keys) {
+					String json = redis.getKey(key);
+					if (!Utils.isNullOrEmpty(json)) {
+						Gson gson = Utils.getGsonBuilder();
+						JsonBodyMail jsonBodyMail = jsonBody.jsonBodyMail;
+						jsonBodyMail = gson.fromJson(json, JsonBodyMail.class);
+						Sender sender = jsonBodyMail.sender;
+						BodyMail bodyMail = jsonBodyMail.bodyMail;
+						List<SendTo> mailList = new ArrayList<SendTo>();
+						mailList = jsonBodyMail.sendTo;
+						if (!mailList.isEmpty() || mailList != null) {
+							for (int attempt = 1; attempt <= 3; attempt++) {
+								int mailsToSend = mailList.size();
 								/*
-								 * If the list is empty, this is a good signal
-								 * and the key will be renamed from 'waiting' to
-								 * 'sent'
+								 * Send e-mails and return a list of
+								 * unsuccessful sent
 								 */
-								if ((exceptionList.isEmpty() || exceptionList == null)) {
-									renameKeySent(redis, key, sender);
-									break;
-								} else {
-									/* Try again */
-									logger.info("Institution: " + sender.company + " trying again to send e-mails");
-									mailList = new ArrayList<SendTo>();
-									mailList = exceptionList;
+								logger.info("Institution: " + sender.company + ". Attempt " + attempt + ". Trying to send " + mailsToSend);
+								try {
+									List<SendTo> exceptionList = sendMail(mailList, sender, bodyMail);
+									/*
+									 * If the list is empty, this is a good
+									 * signal and the key will be renamed from
+									 * 'waiting' to 'sent'
+									 */
+									if ((exceptionList.isEmpty() || exceptionList == null)) {
+										renameKeySent(redis, key, sender);
+										break;
+									} else {
+										/* Try again */
+										logger.info("Institution: " + sender.company + " trying again to send e-mails");
+										mailList = new ArrayList<SendTo>();
+										mailList = exceptionList;
+									}
+									if (attempt == 3) {
+										/* Create a new key with send failure */
+										setSendFailureOnRedis(redis, jsonBodyMail, mailList);
+										break;
+									}
+								} catch (Exception e) {
+									e.getStackTrace();
 								}
-								if (attempt == 3) {
-									/* Create a new key with send failure */
-									setSendFailureOnRedis(redis, jsonBodyMail, mailList);
-									break;
-								}
-							} catch (Exception e) {
-								e.getStackTrace();
+								attempt++;
 							}
-							attempt++;
 						}
 					}
 				}
+			} else {
+				logger.info("No e-mails to send at " + Utils.dateNow() + ".");
 			}
 		} catch (Exception e) {
 			e.getStackTrace();

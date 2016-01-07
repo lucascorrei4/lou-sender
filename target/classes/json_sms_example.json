@@ -12,7 +12,7 @@
     "sendTo": [
         {
             "name": "Lucas da Silva",
-            "destination": "629541125",
+            "destination": "6292670199",
             "sex": "masculino",
             "status": {
                 "sent": false,
@@ -22,7 +22,7 @@
         },
         {
             "name": "Maria Ferreira",
-            "destination": "629541125",
+            "destination": "6292670199",
             "sex": "feminino",
             "status": {
                 "sent": false,
@@ -32,7 +32,7 @@
         },
         {
             "name": "José das Pedras",
-            "destination": "629541125",
+            "destination": "6292670199",
             "sex": "feminino",
             "status": {
                 "sent": false,
