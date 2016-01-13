@@ -118,9 +118,12 @@ public class SendMailController {
 				Status status = sendTo.status;
 				if (!status.sent) {
 					Mail mail = new Mail();
-					mail.sendHTMLMail(sendTo, sender, bodyMail);
-					status.sent = true;
-					status.sendDate = Utils.getCurrentDateTime();
+					if (mail.sendHTMLMail(sendTo, sender, bodyMail)) {
+						status.sent = true;
+						status.sendDate = Utils.getCurrentDateTime();
+					} else {
+						exceptionList.add(sendTo);
+					}
 				}
 			} catch (Exception e) {
 				logger.error("Institution: " + sender.company + ". Error trying to send mail to: " + sendTo.destination);

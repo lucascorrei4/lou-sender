@@ -95,4 +95,9 @@ public class Utils {
 		String dateNow = formatter.format(currentDate.getTime());
 		return dateNow;
 	}
+	
+	public static String removeHTML(String str) {
+		str = str.replaceAll("\\<[^>]*>","");
+		return str;
+	}
 }
