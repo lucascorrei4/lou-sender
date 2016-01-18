@@ -59,6 +59,8 @@ public class SendMailController {
 									 * 'waiting' to 'sent'
 									 */
 									if ((exceptionList.isEmpty() || exceptionList == null)) {
+										logger.info("Trying to set key: " + key);
+										redis.set(key, jsonBodyMail.toString());
 										renameKeySent(redis, key, sender);
 										break;
 									} else {

@@ -146,4 +146,7 @@ public class ApplicationConfiguration {
 		return getProperty("app.sms.apiKey");
 	}
 
+	public String getSMSApiUrl() {
+		return getProperty("app.sms.url");
+	}
 }

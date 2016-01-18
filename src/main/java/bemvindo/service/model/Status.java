@@ -5,6 +5,7 @@ public class Status {
 	public boolean read;
 
 	public String sendDate;
+	public int msgId;
 	
 	@Override
 	public String toString() {
@@ -12,7 +13,8 @@ public class Status {
 		sb.append("{");
 		sb.append("\"sent\":" + sent + ",");
 		sb.append("\"read\":" + read + ",");
-		sb.append("\"sendDate\":\"" + sendDate + "\"");
+		sb.append("\"sendDate\":\"" + sendDate + "\",");
+		sb.append("\"msgId\":" + msgId + "");
 		sb.append("}");
 		
 		return sb.toString();

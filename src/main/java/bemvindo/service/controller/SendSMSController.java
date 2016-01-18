@@ -24,8 +24,7 @@ public class SendSMSController {
 
 	public void controlSMSsending() {
 		try {
-			JedisConectionPool redisPool = JedisConectionPool.getInstance();
-			JedisManager redis = new JedisManager(redisPool);
+			JedisManager redis = getRegisManager();
 			/*
 			 * Connect in redis and list keys that are waiting to be sent with
 			 * clausure 'sms*waiting'
@@ -44,7 +43,7 @@ public class SendSMSController {
 						List<SendTo> smsList = new ArrayList<SendTo>();
 						smsList = jsonBodySMS.sendTo;
 						if (!smsList.isEmpty() || smsList != null) {
-							for (int attempt = 1; attempt == 3; attempt++) {
+							for (int attempt = 1; attempt <= 3; attempt++) {
 								int smssToSend = smsList.size();
 								/*
 								 * Send sms and return a list of unsuccessful
@@ -59,6 +58,8 @@ public class SendSMSController {
 									 * 'waiting' to 'sent'
 									 */
 									if ((exceptionList.isEmpty() || exceptionList == null)) {
+										logger.info("Trying to set key: " + key);
+										redis.set(key, jsonBodySMS.toString());
 										renameKeySent(redis, key, sender);
 										break;
 									} else {
@@ -74,6 +75,8 @@ public class SendSMSController {
 									}
 								} catch (Exception e) {
 									e.getStackTrace();
+								} finally {
+									redis.close();
 								}
 								attempt++;
 							}
@@ -118,9 +121,10 @@ public class SendSMSController {
 				Status status = sendTo.status;
 				if (!status.sent) {
 					SMS sms = new SMS();
-					sms.sendSMS(sendTo, sender, bodySMS);
-					status.sent = true;
-					status.sendDate = Utils.getCurrentDateTime();
+					String responseStatus = sms.sendSMS(sendTo, sender, bodySMS, status);
+					if (!"SUCCESS".equals(responseStatus)) {
+						exceptionList.add(sendTo);
+					}
 				}
 			} catch (Exception e) {
 				logger.error("Institution: " + sender.company + ". Error trying to send sms to: " + sendTo.destination);
@@ -130,6 +134,12 @@ public class SendSMSController {
 			}
 		}
 		return exceptionList;
+	}
+
+	public JedisManager getRegisManager() {
+		JedisConectionPool redisPool = JedisConectionPool.getInstance();
+		JedisManager redis = new JedisManager(redisPool);
+		return redis;
 	}
 
 }

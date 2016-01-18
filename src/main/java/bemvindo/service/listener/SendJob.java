@@ -17,22 +17,17 @@ public class SendJob implements Job {
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
-		
 		String triggerFeedUrl = context.getTrigger().getJobKey().toString();
 
-		logger.info("Starting SendMailController().controlMailSending(): " + triggerFeedUrl + " Job at " + Utils.dateNow());
-
+		logger.info("Start Send Mail: " + triggerFeedUrl + " Job at " + Utils.dateNow());
 		SendMailController sendController = new SendMailController();
 		sendController.controlMailSending();
+		logger.info("Finish Send Mail: " + triggerFeedUrl + " Job at " + Utils.dateNow());
 
-		logger.info("Finishing SendMailController().controlMailSending(): " + triggerFeedUrl + " Job at " + Utils.dateNow());
-
-		logger.info("Starting SendSMSController().controlSMSSending(): " + triggerFeedUrl + " Job at " + Utils.dateNow());
-		
-		SendSMSController  sendSMSController = new SendSMSController();
+		logger.info("Start Send SMS: " + triggerFeedUrl + " Job at " + Utils.dateNow());
+		SendSMSController sendSMSController = new SendSMSController();
 		sendSMSController.controlSMSsending();
-		
-		logger.info("Finishing SendMailController().controlMailSending(): " + triggerFeedUrl + " Job at " + Utils.dateNow());
+		logger.info("Finish Send Mail: " + triggerFeedUrl + " Job at " + Utils.dateNow());
 	}
 
 }

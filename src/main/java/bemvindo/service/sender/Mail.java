@@ -29,27 +29,6 @@ public class Mail {
 
 	public static Logger logger = Logger.getLogger(Mail.class);
 
-	public void sendSimpleMail() {
-		try {
-			SimpleEmail email = new SimpleEmail();
-			System.out.println("alterando hostname...");
-			email.setHostName("smtp.gmail.com");
-			email.setSmtpPort(465);
-			email.addTo("xxx@xxx.com", "Jose");
-			email.setFrom("seuemail@seuprovedor.com", "Seu nome");
-			email.setSubject("Test message");
-			email.setMsg("This is a simple test of commons-email");
-			System.out.println("autenticando...");
-			email.setAuthentication("username", "senha");
-			System.out.println("enviando...");
-			email.send();
-			System.out.println("Email enviado!");
-		} catch (EmailException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
 	public boolean sendHTMLMail(SendTo sendTo, Sender sender, BodyMail bodyMail) {
 		final String userName = ApplicationConfiguration.getInstance().getMailUserName();
 		final String password = ApplicationConfiguration.getInstance().getMailPassword();

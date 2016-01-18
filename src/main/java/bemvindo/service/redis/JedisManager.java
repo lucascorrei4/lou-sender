@@ -7,6 +7,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 public class JedisManager {
 
@@ -25,10 +26,10 @@ public class JedisManager {
 			jedis.set(key, value);
 			// jedis.expire(key,
 			// ApplicationConfiguration.getInstance().getRedisExpire());
-			redisPool.returnWriteJedisToPool(jedis);
+			// redisPool.returnWriteJedisToPool(jedis);
 
 			logger.debug(String.format("Set: %s", key));
-		} catch (Exception e) {
+		} catch (JedisConnectionException e) {
 			logger.error("Failed to set key! " + "Message: " + e.getMessage() + " Cause: " + e.getCause());
 		}
 	}
@@ -38,9 +39,11 @@ public class JedisManager {
 		try {
 			Jedis jedis = redisPool.getWriteJedisFromPool();
 			result = jedis.rename(key, newkey);
-			redisPool.returnWriteJedisToPool(jedis);
+
+			// redisPool.returnWriteJedisToPool(jedis);
+
 			logger.debug("Rename key: " + key + " to: " + newkey);
-		} catch (Exception e) {
+		} catch (JedisConnectionException e) {
 			logger.error("Failed to rename key! " + "Message: " + e.getMessage() + " Cause: " + e.getCause());
 		}
 		return result;
@@ -57,7 +60,7 @@ public class JedisManager {
 			redisPool.returnWriteJedisToPool(jedis);
 
 			logger.debug(String.format("HSet: %s", key));
-		} catch (Exception e) {
+		} catch (JedisConnectionException e) {
 			logger.error("Failed to hset key! " + "Message: " + e.getMessage() + " Cause: " + e.getCause());
 		}
 
@@ -72,7 +75,7 @@ public class JedisManager {
 			redisPool.returnReadJedisToPool(jedis);
 
 			logger.debug(String.format("Get: %s", key));
-		} catch (Exception e) {
+		} catch (JedisConnectionException e) {
 			logger.error("Failed to get key! " + "Message: " + e.getMessage() + " Cause: " + e.getCause());
 		}
 
@@ -84,10 +87,10 @@ public class JedisManager {
 		try {
 			Jedis jedis = redisPool.getReadJedisFromPool();
 			result = jedis.keys(pattern);
-			redisPool.returnReadJedisToPool(jedis);
+			// redisPool.returnReadJedisToPool(jedis);
 
 			logger.debug(String.format("Keys by pattern: %s", pattern));
-		} catch (Exception e) {
+		} catch (JedisConnectionException e) {
 			logger.error("Failed to get keys by pattern: " + pattern + ". " + "Message: " + e.getMessage() + " Cause: " + e.getCause());
 		}
 
@@ -98,10 +101,10 @@ public class JedisManager {
 		try {
 			Jedis jedis = redisPool.getReadJedisFromPool();
 			jedis.del(key);
-			redisPool.returnWriteJedisToPool(jedis);
+			// redisPool.returnWriteJedisToPool(jedis);
 
 			logger.debug(String.format("Delete: %s", key));
-		} catch (Exception e) {
+		} catch (JedisConnectionException e) {
 			logger.error("Failed to remove key! " + "Message: " + e.getMessage() + " Cause: " + e.getCause());
 		}
 	}
@@ -112,8 +115,8 @@ public class JedisManager {
 		try {
 			Jedis jedis = redisPool.getReadJedisFromPool();
 			result = jedis.mget(keysArray);
-			redisPool.returnReadJedisToPool(jedis);
-		} catch (Exception e) {
+			// redisPool.returnReadJedisToPool(jedis);
+		} catch (JedisConnectionException e) {
 			logger.error("Failed to list keys! " + "Message: " + e.getMessage() + " Cause: " + e.getCause());
 		}
 
@@ -131,6 +134,16 @@ public class JedisManager {
 		} else {
 			System.out.println(retorno);
 		}
+	}
+
+	public void close() {
+		try {
+			Jedis jedis = redisPool.getWriteJedisFromPool();
+			jedis.close();
+		} catch (JedisConnectionException e) {
+			logger.error("Failed closing connection! " + "Message: " + e.getMessage() + " Cause: " + e.getCause());
+		}
+
 	}
 
 }

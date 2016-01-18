@@ -5,8 +5,8 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 import bemvindo.service.configuration.ApplicationConfiguration;
 
 public class JedisConectionPool {
@@ -44,10 +44,10 @@ public class JedisConectionPool {
 
 	private JedisPoolConfig configureJedisPoolConfig(String masterOrSlave) {
 		JedisPoolConfig poolConfig = new JedisPoolConfig();
-		poolConfig.setMaxActive(Integer.valueOf(ApplicationConfiguration.getInstance().getJedisMaxActive()));
+		poolConfig.setMaxTotal(Integer.valueOf(ApplicationConfiguration.getInstance().getJedisMaxActive()));
 		poolConfig.setMinIdle(ApplicationConfiguration.getInstance().getJedisMinIdle());
 		poolConfig.setMaxIdle(ApplicationConfiguration.getInstance().getJedisMaxIdle());
-		poolConfig.setMaxWait(ApplicationConfiguration.getInstance().getJedisMaxWait());
+		poolConfig.setMaxWaitMillis(ApplicationConfiguration.getInstance().getJedisMaxWait());
 		poolConfig.setTestOnBorrow(ApplicationConfiguration.getInstance().getJedisTestOnBorrow());
 		poolConfig.setTestOnReturn(ApplicationConfiguration.getInstance().getJedisTestWhileIdle());
 		poolConfig.setTestWhileIdle(ApplicationConfiguration.getInstance().getJedisTestWhileIdle());
@@ -75,6 +75,8 @@ public class JedisConectionPool {
 	}
 
 	public Jedis connectionHealthCheck(JedisPool jedisPool, int retries) throws IllegalStateException {
+		if (jedisPool == null)
+			jedisPool = getPool("master");
 
 		Jedis jedis = null;
 		try {
@@ -135,4 +137,5 @@ public class JedisConectionPool {
 	public JedisPool getJedisPoolSlave() {
 		return slavePool;
 	}
+
 }
