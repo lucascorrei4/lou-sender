@@ -31,7 +31,7 @@ public class ApplicationConfiguration {
 		if (properties == null) {
 			try {
 				properties = new Properties();
-				confPath = System.getProperty("bemvindo.conf.path");
+				confPath = "C:\\Users\\Lucas\\Google Drive\\Lucas\\dev";
 				File propertyFile = new File(confPath + "\\bemvindo.properties");
 				FileInputStream inputStream = new FileInputStream(propertyFile);
 				properties.load(inputStream);

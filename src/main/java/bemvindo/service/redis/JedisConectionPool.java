@@ -15,8 +15,8 @@ public class JedisConectionPool {
 
 	private Integer retries;
 
-	private JedisPool masterPool;
-	private JedisPool slavePool;
+	private static JedisPool masterPool;
+	private static JedisPool slavePool;
 
 	private static JedisConectionPool instance;
 
@@ -63,7 +63,7 @@ public class JedisConectionPool {
 			List<String> servers = ApplicationConfiguration.getInstance().getJedisServers();
 			String server = masterOrSlave.equals("master") ? servers.get(0) : servers.get(1);
 			int port = ApplicationConfiguration.getInstance().getJedisPort();
-			jedisPool = new JedisPool(configureJedisPoolConfig(masterOrSlave), server, port);
+			jedisPool = new JedisPool(configureJedisPoolConfig(masterOrSlave), server.trim(), port);
 		} catch (Exception e) {
 			logger.error("Failed to initialize redis connection pool. ", e);
 		}
@@ -75,8 +75,6 @@ public class JedisConectionPool {
 	}
 
 	public Jedis connectionHealthCheck(JedisPool jedisPool, int retries) throws IllegalStateException {
-		if (jedisPool == null)
-			jedisPool = getPool("master");
 
 		Jedis jedis = null;
 		try {
@@ -113,6 +111,49 @@ public class JedisConectionPool {
 
 		return jedis;
 	}
+
+	// public Jedis connectionHealthCheck(JedisPool jedisPool, int retries)
+	// throws IllegalStateException {
+	// if (jedisPool == null)
+	// jedisPool = getPool("master");
+	//
+	// Jedis jedis = null;
+	// try {
+	// jedis = jedisPool.getResource();
+	//
+	// if (retries > 0 && !("pong").equalsIgnoreCase(jedis.ping())) {
+	// retries--;
+	// if (jedis != null) {
+	// jedisPool.returnBrokenResource(jedis);
+	// }
+	// return connectionHealthCheck(jedisPool, retries);
+	// }
+	//
+	// } catch (Exception e) {
+	// this.masterPool = getPool("slave");
+	//
+	// retries--;
+	//
+	// if (jedis != null)
+	// jedisPool.returnBrokenResource(jedis);
+	//
+	// if (retries > 0)
+	// connectionHealthCheck(jedisPool, retries);
+	//
+	// else {
+	// logger.error("Error during the health check from redis connection pool. ",
+	// e);
+	//
+	// throw new
+	// IllegalStateException("Failed to return a redis connection valid. ", e);
+	// }
+	// } finally {
+	// jedisPool.returnResource(jedis);
+	// jedisPool.destroy();
+	// }
+	//
+	// return jedis;
+	// }
 
 	public Jedis getReadJedisFromPool() {
 		return connectionHealthCheck(masterPool);

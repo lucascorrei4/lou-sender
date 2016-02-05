@@ -7,14 +7,46 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import bemvindo.service.redis.JedisPersister;
 import bemvindo.service.utils.Utils;
 
 @Path("/")
 public class Rest {
+
+	@GET
+	@Path("/save-key")
+	public Response saveKey(@QueryParam("key") String key, @QueryParam("value") String value) {
+		try {
+			if (!Utils.isNullOrEmpty(key) && !Utils.isNullOrEmpty(value)) {
+				String status = new JedisPersister().saveKey(key, value);
+				return Response.status(200).header("Content-Type", "text/html; charset=utf-8").entity(status).build();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return Response.status(405).header("Content-Type", "text/html; charset=utf-8").entity("Acesso não permitido.").build();
+	}
+
+	@GET
+	@Path("/get-key")
+	public Response getKey(String key) {
+		try {
+			if (!Utils.isNullOrEmpty(key)) {
+				String status = new JedisPersister().searchKey(key);
+				return Response.status(200).header("Content-Type", "text/html; charset=utf-8").entity(status).build();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return Response.status(405).header("Content-Type", "text/html; charset=utf-8").entity("Acesso não permitido.").build();
+	}
 
 	@POST
 	@Path("/send-mail")

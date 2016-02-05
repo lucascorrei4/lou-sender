@@ -30,10 +30,10 @@ public class JedisPersister {
 			logger.info("Trying to get key: " + key);
 			if (redis.getKey(key) != null) {
 				logger.info("Success! Key: " + key + " found!");
-				return "Chave gravada com sucesso!";
+				return "SUCCESS";
 			}
 			logger.error("Problem on Jedis!");
-			return "Problemas na gravaçao dos dados!";
+			return "FAILED";
 		} catch (Exception e) {
 			e.printStackTrace();
 			e.getMessage();
@@ -44,4 +44,40 @@ public class JedisPersister {
 		return null;
 	}
 
+	public String saveKey(String key, String value) {
+		try {
+			JedisConectionPool redisPool = JedisConectionPool.getInstance();
+			JedisManager redis = new JedisManager(redisPool);
+			logger.info("Trying to set key: " + key);
+			redis.set(key, value);
+			if (redis.getKey(key) != null) {
+				logger.info("Success! Key: " + key + " found!");
+				return "<h1>Opa! Chave " + key + " gravada com sucesso!</h1>";
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			e.getMessage();
+			e.getCause();
+			logger.error("Problem on Jedis!");
+		}
+		return "";
+	}
+
+	public String searchKey(String key) {
+		try {
+			JedisConectionPool redisPool = JedisConectionPool.getInstance();
+			JedisManager redis = new JedisManager(redisPool);
+			logger.info("Trying to get key: " + key);
+			if (redis.getKey(key) != null) {
+				logger.info("Success! Key: " + key + " found!");
+				return "<h1>Já que você requisitou a chave " + key + ", toma: </h1>";
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			e.getMessage();
+			e.getCause();
+			logger.error("Problem on Jedis!");
+		}
+		return "";
+	}
 }

@@ -57,7 +57,7 @@ public class JedisManager {
 			ret = jedis.hset(key, field, value);
 			// jedis.expire(key,
 			// ApplicationConfiguration.getInstance().getRedisExpire());
-			redisPool.returnWriteJedisToPool(jedis);
+//			redisPool.returnWriteJedisToPool(jedis);
 
 			logger.debug(String.format("HSet: %s", key));
 		} catch (JedisConnectionException e) {
@@ -72,7 +72,7 @@ public class JedisManager {
 		try {
 			Jedis jedis = redisPool.getReadJedisFromPool();
 			result = jedis.get(key);
-			redisPool.returnReadJedisToPool(jedis);
+//			redisPool.returnReadJedisToPool(jedis);
 
 			logger.debug(String.format("Get: %s", key));
 		} catch (JedisConnectionException e) {
