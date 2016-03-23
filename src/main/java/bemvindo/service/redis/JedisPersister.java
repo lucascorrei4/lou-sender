@@ -68,9 +68,10 @@ public class JedisPersister {
 			JedisConectionPool redisPool = JedisConectionPool.getInstance();
 			JedisManager redis = new JedisManager(redisPool);
 			logger.info("Trying to get key: " + key);
-			if (redis.getKey(key) != null) {
+			String returnKey = redis.getKey(key);
+			if (returnKey != null) {
 				logger.info("Success! Key: " + key + " found!");
-				return "<h1>Já que você requisitou a chave " + key + ", toma: </h1>";
+				return "<h1>" + returnKey + "</h1>";
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

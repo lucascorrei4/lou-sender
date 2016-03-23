@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
@@ -53,7 +52,7 @@ public class Rest {
 	public Response sendMail(String jsonContent) {
 		try {
 			if (!Utils.isNullOrEmpty(jsonContent)) {
-				BemVindoRestService restService = new BemVindoRestService();
+				RestService restService = new RestService();
 				String status = restService.parseJson("mail", jsonContent);
 				return Response.status(200).header("Content-Type", "application/json; charset=utf-8").entity(status).build();
 			}
@@ -68,7 +67,7 @@ public class Rest {
 	public Response sendSMS(String jsonContent) {
 		try {
 			if (!Utils.isNullOrEmpty(jsonContent)) {
-				BemVindoRestService restService = new BemVindoRestService();
+				RestService restService = new RestService();
 				String status = restService.parseJson("sms", jsonContent);
 				return Response.status(200).header("Content-Type", "application/json; charset=utf-8").entity(status).build();
 			}
@@ -76,6 +75,21 @@ public class Rest {
 			e.printStackTrace();
 		}
 		return Response.status(405).header("Content-Type", "application/json; charset=utf-8").entity("Acesso não permitido.").build();
+	}
+	
+	@GET
+	@Path("/register-sender")
+	public Response registerSender(@QueryParam("mail") String mail) {
+		try {
+			if (!Utils.isNullOrEmpty(mail)) {
+				RestService restService = new RestService();
+				String status = restService.registerSender(mail);
+				return Response.status(200).header("Content-Type", "text/html; charset=utf-8").entity(status).build();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return Response.status(405).header("Content-Type", "text/html; charset=utf-8").entity("Acesso não permitido.").build();
 	}
 
 	@SuppressWarnings("resource")
@@ -94,7 +108,7 @@ public class Rest {
 				jsonContent += str;
 			}
 
-			BemVindoRestService restService = new BemVindoRestService();
+			RestService restService = new RestService();
 			restService.parseJson("sms", jsonContent);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());

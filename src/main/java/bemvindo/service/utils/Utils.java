@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import org.rythmengine.Rythm;
 
@@ -99,5 +100,9 @@ public class Utils {
 	public static String removeHTML(String str) {
 		str = str.replaceAll("\\<[^>]*>","");
 		return str;
+	}
+	
+	public static String randomKey() {
+		return UUID.randomUUID().toString();
 	}
 }
