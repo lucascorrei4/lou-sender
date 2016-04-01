@@ -72,7 +72,7 @@ public class SMS {
 
 	public void getStatusSMS(int msgId) {
 		try {
-			URL url = new URL(STR_URL_STATUS_SMS + "Userid=" + STR_SMS_USER_ID + "&pwd=" + STR_SMS_PWD + "&APIKEY=" + STR_SMS_API_KEY + "&MSGID=" + msgId);
+			URL url = new URL(STR_URL_STATUS_SMS.concat("Userid=").concat(STR_SMS_USER_ID).concat("&pwd=").concat(STR_SMS_PWD).concat("&APIKEY=").concat(STR_SMS_API_KEY).concat("&MSGID=").concat(String.valueOf(msgId)));
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 			if (conn.getResponseCode() != 200) {
@@ -90,9 +90,9 @@ public class SMS {
 		}
 	}
 
-	public void getQueryBalance() {
+	public String getQueryBalance() {
 		try {
-			URL url = new URL(STR_URL_QUERY_BALANCE + "Userid=" + STR_SMS_USER_ID + "&pwd=" + STR_SMS_PWD + "&APIKEY=" + STR_SMS_API_KEY);
+			URL url = new URL(STR_URL_QUERY_BALANCE.concat("Userid=").concat(STR_SMS_USER_ID).concat("&pwd=").concat(STR_SMS_PWD).concat("&APIKEY=").concat(STR_SMS_API_KEY));
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 			if (conn.getResponseCode() != 200) {
@@ -100,19 +100,22 @@ public class SMS {
 				throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
 			}
 			BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-			String output;
-			while ((output = br.readLine()) != null) {
-				System.out.println(output);
+			String aux = "";
+			String output = "";
+			while ((aux = br.readLine()) != null) {
+				output = output.concat(aux);
 			}
 			conn.disconnect();
+			return output.substring(output.indexOf("<AccountBalance>"), output.indexOf("</AccountBalance>")).replaceAll("<AccountBalance>", "");
 		} catch (Exception e) {
 			e.getStackTrace();
 		}
+		return "";
 	}
 
 	public static void main(String[] args) {
 		// 64018048 22h30 64018065 22H37
 		// new SendSMSController().getStatusSMS(64016211);
-		// new SendSMSController().getQueryBalance();
+		 System.out.println(new SMS().getQueryBalance());
 	}
 }

@@ -1,6 +1,7 @@
 package bemvindo.service.utils;
 
 import java.text.DateFormat;
+import java.text.Normalizer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -9,11 +10,17 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.rythmengine.Rythm;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class Utils {
 	public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm";
@@ -96,13 +103,48 @@ public class Utils {
 		String dateNow = formatter.format(currentDate.getTime());
 		return dateNow;
 	}
-	
+
 	public static String removeHTML(String str) {
-		str = str.replaceAll("\\<[^>]*>","");
+		str = str.replaceAll("\\<[^>]*>", "");
 		return str;
 	}
-	
+
 	public static String randomKey() {
 		return UUID.randomUUID().toString();
 	}
+
+    public static String removeAccentuation(String str) {
+        String nfdNormalizedString = Normalizer.normalize(str, Normalizer.Form.NFD); 
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(nfdNormalizedString).replaceAll("");
+    }
+    
+    public static JsonObject getJsonObject(String jsonContent, String objectName) {
+		JsonParser parser = new JsonParser();
+		JsonObject obj = parser.parse(jsonContent).getAsJsonObject();
+		JsonElement element = obj.get("security-key");
+		JsonObject jsonObject = (JsonObject) obj.get(objectName);
+		return jsonObject;
+	}
+    
+    public static String getJsonElement(String jsonContent, String elementName) {
+    	JsonParser parser = new JsonParser();
+    	JsonObject obj = parser.parse(jsonContent).getAsJsonObject();
+    	JsonElement element = obj.get(elementName);
+    	return element.getAsString();
+    }
+    
+    public static void main(String[] args) {
+    	String contentKey = "{".concat("\"security-key\"").concat(":").concat("\"").concat(Utils.randomKey()).concat("\"}");
+    	System.out.println(getJsonElement(contentKey, "security-key"));
+	}
+
+	public static JsonArray getJsonArray(String jsonContent, String arrayName) {
+		JsonParser parser = new JsonParser();
+		JsonObject obj = parser.parse(jsonContent).getAsJsonObject();
+		JsonArray jsonArray = (JsonArray) obj.get(arrayName);
+		return jsonArray;
+	}
+
+
 }

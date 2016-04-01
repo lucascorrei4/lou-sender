@@ -15,7 +15,7 @@
             <cron>
                 <name>SendJob</name>
                 <job-name>SendJob</job-name>
-                <cron-expression>0 0/1 * 1/1 * ? *</cron-expression>
+                <cron-expression>0 0/1 * * * ?</cron-expression>
             </cron>
         </trigger>
     </schedule>

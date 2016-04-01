@@ -1,7 +1,6 @@
 package bemvindo.service.rest;
 
 import java.lang.reflect.Modifier;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -9,9 +8,8 @@ import org.apache.log4j.Logger;
 import bemvindo.service.model.JsonBody;
 import bemvindo.service.model.JsonBodyMail;
 import bemvindo.service.model.JsonBodySMS;
-import bemvindo.service.redis.JedisConectionPool;
-import bemvindo.service.redis.JedisManager;
 import bemvindo.service.redis.JedisPersister;
+import bemvindo.service.sender.SMS;
 import bemvindo.service.utils.Utils;
 
 import com.google.gson.Gson;
@@ -49,13 +47,23 @@ public class RestService {
 	public String registerSender(String mail) {
 		String prefixSender = "sender:".concat(mail);
 		String authKey = new JedisPersister().searchKey(prefixSender);
-		String response = null;
+		String response;
 		if (StringUtils.isNotBlank(authKey)) {
 			response = authKey;
 		} else {
-			response = new JedisPersister().saveKey(prefixSender, Utils.randomKey());
+			String contentKey = "{".concat("\"security-key\"").concat(":").concat("\"").concat(Utils.randomKey()).concat("\"}");
+			response = new JedisPersister().saveKey(prefixSender, contentKey);
 		}
 		return response;
+	}
+	
+	public static void main(String[] args) {
+		String contentKey = "{".concat("\"security-key\"").concat(":").concat("\"").concat(Utils.randomKey()).concat("\"}");
+		System.out.println(contentKey);
+	}
+	
+	public String loadBalance() {
+		return "<h1>".concat("U$ ").concat(new SMS().getQueryBalance()).concat("</h1>"); 
 	}
 
 }

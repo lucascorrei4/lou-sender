@@ -1,5 +1,7 @@
 package bemvindo.service.model;
 
+import bemvindo.service.utils.Utils;
+
 public class BodySMS {
 	public String title;
 	public String message;
@@ -8,8 +10,8 @@ public class BodySMS {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("{");
-		sb.append("\"title\":\"" + title + "\",");
-		sb.append("\"message\":\"" + message + "\"");
+		sb.append("\"title\":\"" + Utils.removeAccentuation(title) + "\",");
+		sb.append("\"message\":\"" + Utils.removeAccentuation(message) + "\"");
 		sb.append("}");
 
 		return sb.toString();

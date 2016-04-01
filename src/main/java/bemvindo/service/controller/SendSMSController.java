@@ -14,7 +14,6 @@ import bemvindo.service.model.Sender;
 import bemvindo.service.model.Status;
 import bemvindo.service.redis.JedisConectionPool;
 import bemvindo.service.redis.JedisManager;
-import bemvindo.service.rest.RestService;
 import bemvindo.service.sender.SMS;
 import bemvindo.service.utils.Utils;
 
@@ -23,14 +22,15 @@ import com.google.gson.Gson;
 public class SendSMSController {
 	public static Logger logger = Logger.getLogger(SendSMSController.class);
 
-	public void controlSMSsending() {
+	public synchronized void controlSMSsending() {
 		try {
 			JedisManager redis = getRegisManager();
+			Set<String> keys = null;
 			/*
 			 * Connect in redis and list keys that are waiting to be sent with
 			 * clausure 'sms*waiting'
 			 */
-			Set<String> keys = redis.getKeysByPattern("sms*waiting");
+			keys = redis.getKeysByPattern("sms*waiting");
 			if (!keys.isEmpty()) {
 				JsonBody jsonBody = new JsonBody();
 				for (String key : keys) {
@@ -63,6 +63,12 @@ public class SendSMSController {
 											logger.info("Trying to set key: " + key);
 											redis.set(key, jsonBodySMS.toString());
 											renameKeySent(redis, key, sender);
+											boolean renamedKey = false;
+											while(!renamedKey){
+												if (redis.getKey(key) == null){
+													renamedKey = true;
+												}
+											}
 											break;
 										} else {
 											/* Try again */
@@ -78,12 +84,13 @@ public class SendSMSController {
 											setSendFailureOnRedis(redis, jsonBodySMS, smsList);
 											break;
 										}
+										attempt++;
 									} catch (Exception e) {
 										e.getStackTrace();
 									} finally {
-										redis.close();
+										// redis.close();
+										keys = null;
 									}
-									attempt++;
 								}
 							}
 						}
@@ -147,11 +154,12 @@ public class SendSMSController {
 		JedisManager redis = new JedisManager(redisPool);
 		return redis;
 	}
-	
+
 	public static boolean validateSenderAuthorization(String authKey, JedisManager redis) {
 		Set<String> keys = redis.getKeysByPattern("sender:*");
 		for (String key : keys) {
-			if (key.equals(redis.getKey(key))) {
+			String securityKey = Utils.getJsonElement(redis.getKey(key), "security-key");
+			if (authKey.equals(securityKey)) {
 				return true;
 			}
 		}

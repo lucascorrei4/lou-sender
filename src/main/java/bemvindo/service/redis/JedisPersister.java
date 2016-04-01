@@ -1,5 +1,8 @@
 package bemvindo.service.redis;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.log4j.Logger;
 
 import bemvindo.service.model.JsonBody;
@@ -52,7 +55,7 @@ public class JedisPersister {
 			redis.set(key, value);
 			if (redis.getKey(key) != null) {
 				logger.info("Success! Key: " + key + " found!");
-				return "<h1>Opa! Chave " + key + " gravada com sucesso!</h1>";
+				return redis.getKey(key);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -71,7 +74,7 @@ public class JedisPersister {
 			String returnKey = redis.getKey(key);
 			if (returnKey != null) {
 				logger.info("Success! Key: " + key + " found!");
-				return "<h1>" + returnKey + "</h1>";
+				return returnKey;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -80,5 +83,24 @@ public class JedisPersister {
 			logger.error("Problem on Jedis!");
 		}
 		return "";
+	}
+	
+	public Set<String> searchKeysByPattern(String pattern) {
+		try {
+			JedisConectionPool redisPool = JedisConectionPool.getInstance();
+			JedisManager redis = new JedisManager(redisPool);
+			logger.info("Trying to get key: " + pattern);
+			Set<String>	listKeys = redis.getKeysByPattern(pattern);
+			if (listKeys != null) {
+				logger.info("Success! Keys by: " + pattern + " found!");
+				return listKeys;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			e.getMessage();
+			e.getCause();
+			logger.error("Problem on Jedis!");
+		}
+		return null;
 	}
 }
