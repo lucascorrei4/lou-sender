@@ -4,7 +4,7 @@ public class Sender {
 	public String key;
 	public String company;
 	public String from;
-	public String postedAt;
+	public String receivedAt;
 
 	@Override
 	public String toString() {
@@ -13,7 +13,7 @@ public class Sender {
 		sb.append("\"key\":\"" + key + "\",");
 		sb.append("\"company\":\"" + company + "\",");
 		sb.append("\"from\":\"" + from + "\",");
-		sb.append("\"postedAt\":\"" + postedAt + "\"");
+		sb.append("\"postedAt\":\"" + receivedAt + "\"");
 		sb.append("}");
 
 		return sb.toString();

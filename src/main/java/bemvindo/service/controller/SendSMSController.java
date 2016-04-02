@@ -14,6 +14,7 @@ import bemvindo.service.model.Sender;
 import bemvindo.service.model.Status;
 import bemvindo.service.redis.JedisConectionPool;
 import bemvindo.service.redis.JedisManager;
+import bemvindo.service.redis.JedisPersister;
 import bemvindo.service.sender.SMS;
 import bemvindo.service.utils.Utils;
 
@@ -22,7 +23,7 @@ import com.google.gson.Gson;
 public class SendSMSController {
 	public static Logger logger = Logger.getLogger(SendSMSController.class);
 
-	public synchronized void controlSMSsending() {
+	public synchronized void smsSendingControl() {
 		try {
 			JedisManager redis = getRegisManager();
 			Set<String> keys = null;
@@ -40,7 +41,8 @@ public class SendSMSController {
 						JsonBodySMS jsonBodySMS = jsonBody.jsonBodySMS;
 						jsonBodySMS = gson.fromJson(json, JsonBodySMS.class);
 						Sender sender = jsonBodySMS.sender;
-						if (validateSenderAuthorization(sender.key, redis)) {
+						/* Validate sender key */
+						if (new JedisPersister().validateSenderAuthorization(sender.key, redis)) {
 							BodySMS bodySMS = jsonBodySMS.bodySMS;
 							List<SendTo> smsList = new ArrayList<SendTo>();
 							smsList = jsonBodySMS.sendTo;
@@ -64,8 +66,8 @@ public class SendSMSController {
 											redis.set(key, jsonBodySMS.toString());
 											renameKeySent(redis, key, sender);
 											boolean renamedKey = false;
-											while(!renamedKey){
-												if (redis.getKey(key) == null){
+											while (!renamedKey) {
+												if (redis.getKey(key) == null) {
 													renamedKey = true;
 												}
 											}
@@ -88,7 +90,6 @@ public class SendSMSController {
 									} catch (Exception e) {
 										e.getStackTrace();
 									} finally {
-										// redis.close();
 										keys = null;
 									}
 								}
@@ -107,8 +108,8 @@ public class SendSMSController {
 	private void setSendFailureOnRedis(JedisManager redis, JsonBodySMS jsonBodySMS, List<SendTo> smsList) {
 		jsonBodySMS.sendTo = new ArrayList<SendTo>();
 		jsonBodySMS.sendTo = smsList;
-		String postedAt = Utils.stringToDate(jsonBodySMS.sender.postedAt, Utils.DEFAULT_DATE_FORMAT);
-		String key = "sms" + ":" + jsonBodySMS.sender.key + ":" + postedAt + ":failure";
+		String receivedAt = Utils.stringToDate(jsonBodySMS.sender.receivedAt, Utils.DEFAULT_DATE_FORMAT);
+		String key = "sms" + ":" + jsonBodySMS.sender.key + ":" + receivedAt + ":failure";
 		logger.info("Trying to set send failure key: " + key);
 		redis.set(key, jsonBodySMS.toString());
 		logger.info("Trying to get key: " + key);
@@ -153,17 +154,6 @@ public class SendSMSController {
 		JedisConectionPool redisPool = JedisConectionPool.getInstance();
 		JedisManager redis = new JedisManager(redisPool);
 		return redis;
-	}
-
-	public static boolean validateSenderAuthorization(String authKey, JedisManager redis) {
-		Set<String> keys = redis.getKeysByPattern("sender:*");
-		for (String key : keys) {
-			String securityKey = Utils.getJsonElement(redis.getKey(key), "security-key");
-			if (authKey.equals(securityKey)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 }

@@ -28,7 +28,6 @@ public class SMS {
 
 	public String sendSMS(SendTo sendTo, Sender sender, BodySMS bodySMS, Status status) {
 		try {
-			// String from = sender.from;
 			String from = "DEFAULT";
 			String to = sendTo.destination;
 			String msg = bodySMS.message;

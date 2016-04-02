@@ -14,6 +14,7 @@ import bemvindo.service.model.Sender;
 import bemvindo.service.model.Status;
 import bemvindo.service.redis.JedisConectionPool;
 import bemvindo.service.redis.JedisManager;
+import bemvindo.service.redis.JedisPersister;
 import bemvindo.service.sender.Mail;
 import bemvindo.service.utils.Utils;
 
@@ -22,15 +23,15 @@ import com.google.gson.Gson;
 public class SendMailController {
 	public static Logger logger = Logger.getLogger(SendMailController.class);
 
-	public void controlMailSending() {
+	public void mailSendingControl() {
 		try {
-			JedisConectionPool redisPool = JedisConectionPool.getInstance();
-			JedisManager redis = new JedisManager(redisPool);
+			JedisManager redis = getRegisManager();
+			Set<String> keys = null;
 			/*
 			 * Connect in redis and list keys that are waiting to be sent with
 			 * clausure 'mail*waiting'
 			 */
-			Set<String> keys = redis.getKeysByPattern("mail*waiting");
+			keys = redis.getKeysByPattern("mail*waiting");
 			if (!keys.isEmpty()) {
 				JsonBody jsonBody = new JsonBody();
 				for (String key : keys) {
@@ -40,44 +41,58 @@ public class SendMailController {
 						JsonBodyMail jsonBodyMail = jsonBody.jsonBodyMail;
 						jsonBodyMail = gson.fromJson(json, JsonBodyMail.class);
 						Sender sender = jsonBodyMail.sender;
-						BodyMail bodyMail = jsonBodyMail.bodyMail;
-						List<SendTo> mailList = new ArrayList<SendTo>();
-						mailList = jsonBodyMail.sendTo;
-						if (!mailList.isEmpty() || mailList != null) {
-							for (int attempt = 1; attempt <= 3; attempt++) {
-								int mailsToSend = mailList.size();
-								/*
-								 * Send e-mails and return a list of
-								 * unsuccessful sent
-								 */
-								logger.info("Institution: " + sender.company + ". Attempt " + attempt + ". Trying to send " + mailsToSend);
-								try {
-									List<SendTo> exceptionList = sendMail(mailList, sender, bodyMail);
+						/* Validate sender key */
+						if (new JedisPersister().validateSenderAuthorization(sender.key, redis)) {
+							BodyMail bodyMail = jsonBodyMail.bodyMail;
+							List<SendTo> mailList = new ArrayList<SendTo>();
+							mailList = jsonBodyMail.sendTo;
+							if (!mailList.isEmpty() || mailList != null) {
+								for (int attempt = 1; attempt <= 3; attempt++) {
+									int mailsToSend = mailList.size();
 									/*
-									 * If the list is empty, this is a good
-									 * signal and the key will be renamed from
-									 * 'waiting' to 'sent'
+									 * Send e-mails and return a list of
+									 * unsuccessful sent
 									 */
-									if ((exceptionList.isEmpty() || exceptionList == null)) {
-										logger.info("Trying to set key: " + key);
-										redis.set(key, jsonBodyMail.toString());
-										renameKeySent(redis, key, sender);
-										break;
-									} else {
-										/* Try again */
-										logger.info("Institution: " + sender.company + " trying again to send e-mails");
-										mailList = new ArrayList<SendTo>();
-										mailList = exceptionList;
+									logger.info("Institution: " + sender.company + ". Attempt " + attempt + ". Trying to send " + mailsToSend);
+									try {
+										List<SendTo> exceptionList = sendMail(mailList, sender, bodyMail);
+										/*
+										 * If the list is empty, this is a good
+										 * signal and the key will be renamed
+										 * from 'waiting' to 'sent'
+										 */
+										if ((exceptionList.isEmpty() || exceptionList == null)) {
+											logger.info("Trying to set key: " + key);
+											redis.set(key, jsonBodyMail.toString());
+											renameKeySent(redis, key, sender);
+											boolean renamedKey = false;
+											while (!renamedKey) {
+												if (redis.getKey(key) == null) {
+													renamedKey = true;
+												}
+											}
+											break;
+										} else {
+											/* Try again */
+											logger.info("Institution: " + sender.company + " trying again to send e-mails");
+											mailList = new ArrayList<SendTo>();
+											mailList = exceptionList;
+										}
+										if (attempt == 3) {
+											/*
+											 * Create a new key with send
+											 * failure
+											 */
+											setSendFailureOnRedis(redis, jsonBodyMail, mailList);
+											break;
+										}
+										attempt++;
+									} catch (Exception e) {
+										e.getStackTrace();
+									} finally {
+										keys = null;
 									}
-									if (attempt == 3) {
-										/* Create a new key with send failure */
-										setSendFailureOnRedis(redis, jsonBodyMail, mailList);
-										break;
-									}
-								} catch (Exception e) {
-									e.getStackTrace();
 								}
-								attempt++;
 							}
 						}
 					}
@@ -93,8 +108,8 @@ public class SendMailController {
 	private void setSendFailureOnRedis(JedisManager redis, JsonBodyMail jsonBodyMail, List<SendTo> mailList) {
 		jsonBodyMail.sendTo = new ArrayList<SendTo>();
 		jsonBodyMail.sendTo = mailList;
-		String postedAt = Utils.stringToDate(jsonBodyMail.sender.postedAt, Utils.DEFAULT_DATE_FORMAT);
-		String key = "mail" + ":" + jsonBodyMail.sender.key + ":" + postedAt + ":failure";
+		String receivedAt = Utils.stringToDate(jsonBodyMail.sender.receivedAt, Utils.DEFAULT_DATE_FORMAT);
+		String key = "mail" + ":" + jsonBodyMail.sender.key + ":" + receivedAt + ":failure";
 		logger.info("Trying to set send failure key: " + key);
 		redis.set(key, jsonBodyMail.toString());
 		logger.info("Trying to get key: " + key);
@@ -135,6 +150,12 @@ public class SendMailController {
 			}
 		}
 		return exceptionList;
+	}
+	
+	public JedisManager getRegisManager() {
+		JedisConectionPool redisPool = JedisConectionPool.getInstance();
+		JedisManager redis = new JedisManager(redisPool);
+		return redis;
 	}
 
 }

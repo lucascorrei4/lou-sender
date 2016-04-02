@@ -1,6 +1,5 @@
 package bemvindo.service.redis;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -14,19 +13,19 @@ public class JedisPersister {
 
 	public String persist(JsonBody jsonBody, String type) {
 		try {
-			String postedAt = null;
+			String receivedAt = null;
 			String key = null;
 			JedisConectionPool redisPool = JedisConectionPool.getInstance();
 			JedisManager redis = new JedisManager(redisPool);
 			if ("mail".equals(type)) {
-				postedAt = Utils.stringToDate(jsonBody.jsonBodyMail.sender.postedAt, Utils.DEFAULT_DATE_FORMAT);
-				key = type + ":" + jsonBody.jsonBodyMail.sender.key + ":" + postedAt + ":waiting";
+				receivedAt = Utils.stringToDate(jsonBody.jsonBodyMail.sender.receivedAt, Utils.DEFAULT_DATE_FORMAT);
+				key = type + ":" + jsonBody.jsonBodyMail.sender.key + ":" + receivedAt + ":waiting";
 				logger.info("Trying to set key: " + key);
 				redis.set(key, jsonBody.jsonBodyMail.toString());
 			}
 			if ("sms".equals(type)) {
-				postedAt = Utils.stringToDate(jsonBody.jsonBodySMS.sender.postedAt, Utils.DEFAULT_DATE_FORMAT);
-				key = type + ":" + jsonBody.jsonBodySMS.sender.key + ":" + postedAt + ":waiting";
+				receivedAt = Utils.stringToDate(jsonBody.jsonBodySMS.sender.receivedAt, Utils.DEFAULT_DATE_FORMAT);
+				key = type + ":" + jsonBody.jsonBodySMS.sender.key + ":" + receivedAt + ":waiting";
 				logger.info("Trying to set key: " + key);
 				redis.set(key, jsonBody.jsonBodySMS.toString());
 			}
@@ -102,5 +101,16 @@ public class JedisPersister {
 			logger.error("Problem on Jedis!");
 		}
 		return null;
+	}
+	
+	public boolean validateSenderAuthorization(String authKey, JedisManager redis) {
+		Set<String> keys = redis.getKeysByPattern("sender:*");
+		for (String key : keys) {
+			String securityKey = Utils.getJsonElement(redis.getKey(key), "security-key");
+			if (authKey.equals(securityKey)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

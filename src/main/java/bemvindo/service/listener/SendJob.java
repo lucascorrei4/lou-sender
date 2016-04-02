@@ -20,13 +20,13 @@ public class SendJob implements Job {
 		String triggerFeedUrl = context.getTrigger().getJobKey().toString();
 
 		logger.info("Start Send Mail: " + triggerFeedUrl + " Job at " + Utils.dateNow());
-		SendMailController sendController = new SendMailController();
-		sendController.controlMailSending();
+		SendMailController sendMailController = new SendMailController();
+		sendMailController.mailSendingControl();
 		logger.info("Finish Send Mail: " + triggerFeedUrl + " Job at " + Utils.dateNow());
 
 		logger.info("Start Send SMS: " + triggerFeedUrl + " Job at " + Utils.dateNow());
 		SendSMSController sendSMSController = new SendSMSController();
-		sendSMSController.controlSMSsending();
+		sendSMSController.smsSendingControl();
 		logger.info("Finish Send Mail: " + triggerFeedUrl + " Job at " + Utils.dateNow());
 	}
 

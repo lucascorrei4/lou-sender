@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
 import org.rythmengine.Rythm;
 
 import com.google.gson.Gson;
@@ -122,7 +121,6 @@ public class Utils {
     public static JsonObject getJsonObject(String jsonContent, String objectName) {
 		JsonParser parser = new JsonParser();
 		JsonObject obj = parser.parse(jsonContent).getAsJsonObject();
-		JsonElement element = obj.get("security-key");
 		JsonObject jsonObject = (JsonObject) obj.get(objectName);
 		return jsonObject;
 	}

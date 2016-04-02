@@ -14,6 +14,10 @@ import bemvindo.service.utils.Utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class RestService {
 	private static Logger logger = Logger.getLogger(RestService.class);
@@ -25,23 +29,43 @@ public class RestService {
 		builder.disableHtmlEscaping();
 		builder.serializeNulls();
 		builder.serializeSpecialFloatingPointValues();
-
 		Gson gson = builder.create();
-
+		String newJsonContent = null;
 		JsonBody jsonBody = new JsonBody();
-
+		newJsonContent = addSmsPropertiesToJsonContent(jsonContent, type);
 		if ("mail".equals(type)) {
 			logger.info("Parsing JsonBodyMail with json content");
-			jsonBody.jsonBodyMail = gson.fromJson(jsonContent, JsonBodyMail.class);
+			jsonBody.jsonBodyMail = gson.fromJson(newJsonContent, JsonBodyMail.class);
 		}
-
 		if ("sms".equals(type)) {
 			logger.info("Parsing JsonBodySMS with json content");
-			jsonBody.jsonBodySMS = gson.fromJson(jsonContent, JsonBodySMS.class);
+			jsonBody.jsonBodySMS = gson.fromJson(newJsonContent, JsonBodySMS.class);
 		}
-
 		logger.info("Send object jsonBody to redis");
 		return new JedisPersister().persist(jsonBody, type);
+	}
+
+	private String addSmsPropertiesToJsonContent(String jsonContent, String type) {
+		JsonParser parser = new JsonParser();
+		JsonObject jsonObject = parser.parse(jsonContent).getAsJsonObject();
+		/* Get "sender" json object and add "receivedAt" property */
+		JsonObject senderObject = (JsonObject) jsonObject.get("sender");
+		senderObject.addProperty("receivedAt", Utils.getCurrentDateTime());
+		/* Add status properties to sendTo objects */
+		JsonObject statusProperties = new JsonObject();
+		statusProperties.addProperty("sent", false);
+		statusProperties.addProperty("read", false);
+		statusProperties.addProperty("sendDate", "not sent");
+		if ("sms".equals(type)) {
+			statusProperties.addProperty("msgId", 0);
+		}
+		/* Iterates sendTo objects adding status properties */
+		JsonArray jsonArray = (JsonArray) jsonObject.get("sendTo");
+		for (JsonElement jsonEl : jsonArray) {
+			JsonObject jsonObj = jsonEl.getAsJsonObject();
+			jsonObj.add("status", statusProperties);
+		}
+		return jsonObject.toString();
 	}
 
 	public String registerSender(String mail) {
@@ -56,14 +80,14 @@ public class RestService {
 		}
 		return response;
 	}
-	
+
 	public static void main(String[] args) {
 		String contentKey = "{".concat("\"security-key\"").concat(":").concat("\"").concat(Utils.randomKey()).concat("\"}");
 		System.out.println(contentKey);
 	}
-	
+
 	public String loadBalance() {
-		return "<h1>".concat("U$ ").concat(new SMS().getQueryBalance()).concat("</h1>"); 
+		return "<h1>".concat("U$ ").concat(new SMS().getQueryBalance()).concat("</h1>");
 	}
 
 }
